@@ -102,7 +102,7 @@ try {
 
   await client.query(
     `
-        INSERT INTO posts(titl, content, slug, author, status, published_at, updated_at)
+        INSERT INTO posts(title, content, slug, author, status, published_at, updated_at)
         VALUES ${posts
           .map(
             (post, postIndex) =>
