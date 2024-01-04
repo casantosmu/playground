@@ -3,7 +3,8 @@ import { client } from "#src/db.js";
 
 const status = ["publish", "future", "draft", "pending", "private"];
 
-const users = Array.from({ length: 10000 }, () => [
+const users = Array.from({ length: 5000 }, (_, index) => [
+  index + 1,
   faker.internet.userName(),
   faker.internet.password(),
   faker.person.firstName(),
@@ -35,7 +36,8 @@ const categoriesNames = [
   "Practical Tips",
 ];
 
-const categories = categoriesNames.map((name) => [
+const categories = categoriesNames.map((name, index) => [
+  index + 1,
   name,
   faker.lorem.sentences(),
   faker.helpers.slugify(name),
@@ -43,7 +45,8 @@ const categories = categoriesNames.map((name) => [
 
 const postsTitles = Array.from({ length: 5000 }, () => faker.lorem.sentence());
 
-const posts = postsTitles.map((title) => [
+const posts = postsTitles.map((title, index) => [
+  index + 1,
   title,
   faker.lorem.lines(),
   faker.helpers.slugify(title),
@@ -52,6 +55,23 @@ const posts = postsTitles.map((title) => [
   faker.helpers.maybe(() => faker.date.past(), { probability: 0.8 }),
   faker.date.past(),
 ]);
+
+const postsCategories = posts.reduce((prev, post) => {
+  const postId = post[0];
+
+  const categoriesIds = new Set(
+    faker.helpers.multiple(
+      () => faker.number.int({ min: 1, max: categories.length }),
+      { count: { min: 0, max: 7 } }
+    )
+  );
+
+  for (const categoryId of categoriesIds) {
+    prev.push([postId, categoryId]);
+  }
+
+  return prev;
+}, []);
 
 await client.connect();
 
@@ -68,7 +88,7 @@ try {
 
   await client.query(
     `
-        INSERT INTO categories(category_name, description, slug)
+        INSERT INTO categories(category_id, category_name, description, slug)
         VALUES ${categories.map(
           (category, categoryIndex) =>
             `(${category
@@ -84,7 +104,7 @@ try {
 
   await client.query(
     `
-        INSERT INTO users(username, password, first_name, last_name, email, registered_at)
+        INSERT INTO users(user_id, username, password, first_name, last_name, email, registered_at)
         VALUES ${users
           .map(
             (user, userIndex) =>
@@ -102,7 +122,7 @@ try {
 
   await client.query(
     `
-        INSERT INTO posts(title, content, slug, author, status, published_at, updated_at)
+        INSERT INTO posts(post_id, title, content, slug, author, status, published_at, updated_at)
         VALUES ${posts
           .map(
             (post, postIndex) =>
@@ -116,6 +136,26 @@ try {
           .join(",")};
     `,
     posts.flat()
+  );
+
+  await client.query(
+    `
+        INSERT INTO posts_categories(post_id, category_id)
+        VALUES ${postsCategories
+          .map(
+            (postCategory, postCategoryIndex) =>
+              `(${postCategory
+                .map(
+                  (_, paramIndex) =>
+                    `$${
+                      postCategory.length * postCategoryIndex + paramIndex + 1
+                    }`
+                )
+                .join(",")})`
+          )
+          .join(",")};
+    `,
+    postsCategories.flat()
   );
 
   await client.query("COMMIT");
