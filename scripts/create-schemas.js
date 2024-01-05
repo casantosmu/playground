@@ -1,4 +1,4 @@
-import { client } from "#src/db.js";
+import { client } from "#db";
 
 await client.connect();
 

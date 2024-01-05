@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { client, batchInsert, transaction } from "#src/db.js";
+import { client, batchInsert, transaction } from "#db";
 
 const status = ["publish", "future", "draft", "pending", "private"];
 
