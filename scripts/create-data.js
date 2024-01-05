@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { client, batchInsert, transaction } from "#src/db.js";
+import { createClient } from "#db";
 
 const status = ["publish", "future", "draft", "pending", "private"];
 
@@ -71,22 +71,22 @@ const postsCategories = posts.reduce((prev, post) => {
   return prev;
 }, []);
 
-await client.connect();
+const client = await createClient();
 
 try {
-  await transaction(async () => {
+  await client.transaction(async () => {
     await Promise.all([
-      batchInsert({
+      client.batchInsert({
         tableName: "status",
         columns: ["status"],
         values: status.map((status) => [status]),
       }),
-      batchInsert({
+      client.batchInsert({
         tableName: "categories",
         columns: ["category_id", "category_name", "description", "slug"],
         values: categories,
       }),
-      batchInsert({
+      client.batchInsert({
         tableName: "users",
         columns: [
           "user_id",
@@ -99,7 +99,7 @@ try {
         ],
         values: users,
       }),
-      batchInsert({
+      client.batchInsert({
         tableName: "posts",
         columns: [
           "post_id",
@@ -113,7 +113,7 @@ try {
         ],
         values: posts,
       }),
-      batchInsert({
+      client.batchInsert({
         tableName: "posts_categories",
         columns: ["post_id", "category_id"],
         values: postsCategories,
@@ -122,10 +122,9 @@ try {
   });
 
   console.log("Successfully created initial data");
+  process.exit(0);
 } catch (error) {
   console.error("Error while creating initial data");
   console.error(error);
-  process.exitCode = 1;
-} finally {
-  await client.end();
+  process.exit(1);
 }

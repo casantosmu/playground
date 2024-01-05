@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "imports": {
-    "#src/*": "./src/*"
+    "#db": "./db.js"
   },
   "scripts": {
     "init": "npm run init:schemas && npm run init:data",
