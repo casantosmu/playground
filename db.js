@@ -1,9 +1,18 @@
 import pg from "pg";
 
-export const client = new pg.Client(process.env.PG_URI);
+class Client {
+  #client;
 
-export const batchInsert = async ({ tableName, columns, values }) => {
-  const query = `
+  constructor(client) {
+    this.#client = client;
+  }
+
+  async exec(string) {
+    await this.#client.query(string);
+  }
+
+  async batchInsert({ tableName, columns, values }) {
+    const query = `
     INSERT INTO ${tableName}(${columns.join(", ")})
     VALUES ${values
       .map(
@@ -18,16 +27,23 @@ export const batchInsert = async ({ tableName, columns, values }) => {
       .join(", ")};
   `;
 
-  await client.query(query, values.flat());
-};
-
-export const transaction = async (callback) => {
-  try {
-    await client.query("BEGIN");
-    await callback();
-    await client.query("COMMIT");
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
+    await this.#client.query(query, values.flat());
   }
+
+  async transaction(callback) {
+    try {
+      await this.#client.query("BEGIN");
+      await callback(this);
+      await this.#client.query("COMMIT");
+    } catch (error) {
+      await this.#client.query("ROLLBACK");
+      throw error;
+    }
+  }
+}
+
+export const createClient = async () => {
+  const client = new pg.Client(process.env.PG_URI);
+  await client.connect();
+  return new Client(client);
 };

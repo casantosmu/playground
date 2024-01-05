@@ -1,9 +1,9 @@
-import { client } from "#db";
+import { createClient } from "#db";
 
-await client.connect();
+const client = await createClient();
 
 try {
-  await client.query(`
+  await client.exec(`
     DROP TABLE IF EXISTS posts_categories;
     DROP TABLE IF EXISTS posts;
     DROP TABLE IF EXISTS categories;
@@ -50,10 +50,9 @@ try {
   `);
 
   console.log("Successfully created initial schemas");
+  process.exit(0);
 } catch (error) {
   console.error("Error while creating initial schemas");
   console.error(error);
-  process.exitCode = 1;
-} finally {
-  await client.end();
+  process.exit(1);
 }
