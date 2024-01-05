@@ -36,7 +36,7 @@ try {
         title TEXT NOT NULL,
         content	TEXT NOT NULL,
         slug TEXT NOT NULL,
-        author INT NOT NULL REFERENCES users(user_id),
+        author_id INT NOT NULL REFERENCES users(user_id),
         status TEXT NOT NULL REFERENCES status(status),
         published_at TIMESTAMPTZ,
         updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
