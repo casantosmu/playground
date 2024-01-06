@@ -4,12 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "imports": {
-    "#db": "./db.js"
+    "#db": "./db.js",
+    "#dataset.json": "./dataset.json"
   },
   "scripts": {
-    "init": "npm run init:schemas && npm run init:data",
-    "init:schemas": "node --env-file=.env scripts/create-schemas.js",
-    "init:data": "node --env-file=.env scripts/create-data.js"
+    "db:all": "npm run db:create-tables && npm run db:seed",
+    "db:create-tables": "node --env-file=.env scripts/create-tables.js",
+    "db:seed": "node --env-file=.env scripts/seed.js",
+    "codegen:dataset": "node scripts/generate-dataset.js"
   },
   "dependencies": {
     "pg": "^8.11.3"

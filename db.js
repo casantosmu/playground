@@ -13,19 +13,19 @@ class Client {
 
   async batchInsert({ tableName, columns, values }) {
     const query = `
-    INSERT INTO ${tableName}(${columns.join(", ")})
-    VALUES ${values
-      .map(
-        (value, valueIndex) =>
-          `(${value
-            .map(
-              (_, paramIndex) =>
-                `$${value.length * valueIndex + paramIndex + 1}`
-            )
-            .join(", ")})`
-      )
-      .join(", ")};
-  `;
+      INSERT INTO ${tableName}(${columns.join(", ")})
+      VALUES ${values
+        .map(
+          (value, valueIndex) =>
+            `(${value
+              .map(
+                (_, paramIndex) =>
+                  `$${value.length * valueIndex + paramIndex + 1}`
+              )
+              .join(",")})`
+        )
+        .join(",")};
+    `;
 
     await this.#client.query(query, values.flat());
   }

@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { createClient } from "#db";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import fs from "node:fs";
 
 const status = ["publish", "future", "draft", "pending", "private"];
 
@@ -56,7 +58,6 @@ const posts = Array.from({ length: 2500 }, () => faker.lorem.sentence()).map(
 
 const postsCategories = [];
 const comments = [];
-
 for (const post of posts) {
   const postId = post[0];
 
@@ -85,71 +86,15 @@ for (const post of posts) {
   );
 }
 
-const client = await createClient();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const filePath = path.join(__dirname, "..", "dataset.json");
+const fileContent = JSON.stringify({
+  status,
+  users,
+  categories,
+  posts,
+  postsCategories,
+  comments,
+});
 
-try {
-  await client.transaction(async () => {
-    await Promise.all([
-      client.batchInsert({
-        tableName: "status",
-        columns: ["status"],
-        values: status.map((status) => [status]),
-      }),
-      client.batchInsert({
-        tableName: "categories",
-        columns: ["category_id", "name", "description", "slug"],
-        values: categories,
-      }),
-      client.batchInsert({
-        tableName: "users",
-        columns: [
-          "user_id",
-          "username",
-          "password",
-          "first_name",
-          "last_name",
-          "email",
-          "registered_at",
-        ],
-        values: users,
-      }),
-      client.batchInsert({
-        tableName: "posts",
-        columns: [
-          "post_id",
-          "title",
-          "content",
-          "slug",
-          "user_id",
-          "status",
-          "published_at",
-          "updated_at",
-        ],
-        values: posts,
-      }),
-      client.batchInsert({
-        tableName: "posts_categories",
-        columns: ["post_id", "category_id"],
-        values: postsCategories,
-      }),
-      client.batchInsert({
-        tableName: "comments",
-        columns: [
-          "comment_id",
-          "content",
-          "user_id",
-          "post_id",
-          "published_at",
-        ],
-        values: comments,
-      }),
-    ]);
-  });
-
-  console.log("Successfully created initial data");
-  process.exit(0);
-} catch (error) {
-  console.error("Error while creating initial data");
-  console.error(error);
-  process.exit(1);
-}
+fs.writeFileSync(filePath, fileContent);
