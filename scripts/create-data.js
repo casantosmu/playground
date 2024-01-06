@@ -3,7 +3,7 @@ import { createClient } from "#db";
 
 const status = ["publish", "future", "draft", "pending", "private"];
 
-const users = Array.from({ length: 8000 }, (_, index) => [
+const users = Array.from({ length: 300 }, (_, index) => [
   index + 1,
   faker.internet.userName(),
   faker.internet.password(),
@@ -41,7 +41,7 @@ const categories = [
   faker.helpers.slugify(name).toLowerCase(),
 ]);
 
-const posts = Array.from({ length: 8000 }, () => faker.lorem.sentence()).map(
+const posts = Array.from({ length: 2500 }, () => faker.lorem.sentence()).map(
   (title, index) => [
     index + 1,
     title,
@@ -54,7 +54,10 @@ const posts = Array.from({ length: 8000 }, () => faker.lorem.sentence()).map(
   ]
 );
 
-const postsCategories = posts.reduce((prev, post) => {
+const postsCategories = [];
+const comments = [];
+
+for (const post of posts) {
   const postId = post[0];
 
   const categoriesIds = new Set(
@@ -65,11 +68,22 @@ const postsCategories = posts.reduce((prev, post) => {
   );
 
   for (const categoryId of categoriesIds) {
-    prev.push([postId, categoryId]);
+    postsCategories.push([postId, categoryId]);
   }
 
-  return prev;
-}, []);
+  faker.helpers.multiple(
+    () => {
+      comments.push([
+        comments.length + 1,
+        faker.lorem.lines(),
+        faker.number.int({ min: 1, max: users.length }),
+        postId,
+        faker.date.past(),
+      ]);
+    },
+    { count: { min: 0, max: 10 } }
+  );
+}
 
 const client = await createClient();
 
@@ -83,7 +97,7 @@ try {
       }),
       client.batchInsert({
         tableName: "categories",
-        columns: ["category_id", "category_name", "description", "slug"],
+        columns: ["category_id", "name", "description", "slug"],
         values: categories,
       }),
       client.batchInsert({
@@ -106,7 +120,7 @@ try {
           "title",
           "content",
           "slug",
-          "author_id",
+          "user_id",
           "status",
           "published_at",
           "updated_at",
@@ -117,6 +131,17 @@ try {
         tableName: "posts_categories",
         columns: ["post_id", "category_id"],
         values: postsCategories,
+      }),
+      client.batchInsert({
+        tableName: "comments",
+        columns: [
+          "comment_id",
+          "content",
+          "user_id",
+          "post_id",
+          "published_at",
+        ],
+        values: comments,
       }),
     ]);
   });
