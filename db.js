@@ -11,23 +11,19 @@ class Client {
     await this.#client.query(string);
   }
 
-  async batchInsert({ tableName, columns, values }) {
+  async bulkInsert({ tableName, columns, records }) {
+    const columnNames = Object.keys(columns);
+    const columnTypes = Object.values(columns);
     const query = `
-      INSERT INTO ${tableName}(${columns.join(", ")})
-      VALUES ${values
-        .map(
-          (value, valueIndex) =>
-            `(${value
-              .map(
-                (_, paramIndex) =>
-                  `$${value.length * valueIndex + paramIndex + 1}`
-              )
-              .join(",")})`
-        )
-        .join(",")};
+      INSERT INTO ${tableName}(${columnNames.join(",")})
+      SELECT * FROM UNNEST(${columnTypes.map(
+        (columnType, index) => `$${index + 1}::${columnType.toUpperCase()}[]`
+      )});
     `;
-
-    await this.#client.query(query, values.flat());
+    const values = columnNames.map((columnName) =>
+      records.map((record) => record[columnName])
+    );
+    await this.#client.query(query, values);
   }
 
   async transaction(callback) {
