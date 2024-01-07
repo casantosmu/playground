@@ -3,17 +3,24 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
 
-const status = ["publish", "future", "draft", "pending", "private"];
+const getRandomIdFromRecords = (values) =>
+  faker.number.int({ min: 1, max: values.length });
 
-const users = Array.from({ length: 300 }, (_, index) => [
-  index + 1,
-  faker.internet.userName(),
-  faker.internet.password(),
-  faker.person.firstName(),
-  faker.person.lastName(),
-  faker.internet.email(),
-  faker.date.past(),
-]);
+const slug = (string) => faker.helpers.slugify(string).toLowerCase();
+
+const status = ["publish", "future", "draft", "pending", "private"].map(
+  (status) => ({ status })
+);
+
+const users = Array.from({ length: 1000 }, (_, index) => ({
+  user_id: index + 1,
+  username: faker.internet.userName(),
+  password: faker.internet.password(),
+  first_name: faker.person.firstName(),
+  last_name: faker.person.lastName(),
+  email: faker.internet.email(),
+  registered_at: faker.date.past(),
+}));
 
 const categories = [
   "Technology",
@@ -36,53 +43,53 @@ const categories = [
   "Humor",
   "History",
   "Practical Tips",
-].map((name, index) => [
-  index + 1,
-  name,
-  faker.lorem.sentences(),
-  faker.helpers.slugify(name).toLowerCase(),
-]);
+].map((name, index) => ({
+  category_id: index + 1,
+  name: name,
+  description: faker.lorem.sentences(),
+  slug: slug(name),
+}));
 
-const posts = Array.from({ length: 2500 }, () => faker.lorem.sentence()).map(
-  (title, index) => [
-    index + 1,
-    title,
-    faker.lorem.lines(),
-    faker.helpers.slugify(title).toLowerCase(),
-    faker.number.int({ min: 1, max: users.length }),
-    faker.helpers.arrayElement(status),
-    faker.helpers.maybe(() => faker.date.past(), { probability: 0.8 }),
-    faker.date.past(),
-  ]
-);
+const posts = Array.from({ length: 20000 }, (_, index) => {
+  const title = faker.lorem.sentence();
+  return {
+    post_id: index + 1,
+    title: title,
+    content: faker.lorem.lines(),
+    slug: slug(title),
+    user_id: getRandomIdFromRecords(users),
+    status: faker.helpers.arrayElement(status.map(({ status }) => status)),
+    published_at: faker.helpers.maybe(() => faker.date.past(), {
+      probability: 0.8,
+    }),
+    updated_at: faker.date.past(),
+  };
+});
 
 const postsCategories = [];
 const comments = [];
 for (const post of posts) {
-  const postId = post[0];
-
-  const categoriesIds = new Set(
-    faker.helpers.multiple(
-      () => faker.number.int({ min: 1, max: categories.length }),
-      { count: { min: 0, max: 7 } }
-    )
+  const uniqueCategoriesIds = new Set(
+    faker.helpers.multiple(() => getRandomIdFromRecords(categories), {
+      count: { min: 0, max: 7 },
+    })
   );
 
-  for (const categoryId of categoriesIds) {
-    postsCategories.push([postId, categoryId]);
+  for (const categoryId of uniqueCategoriesIds) {
+    postsCategories.push({ post_id: post.post_id, category_id: categoryId });
   }
 
   faker.helpers.multiple(
     () => {
-      comments.push([
-        comments.length + 1,
-        faker.lorem.lines(),
-        faker.number.int({ min: 1, max: users.length }),
-        postId,
-        faker.date.past(),
-      ]);
+      comments.push({
+        comment_id: comments.length + 1,
+        content: faker.lorem.lines(),
+        user_id: getRandomIdFromRecords(users),
+        post_id: post.post_id,
+        published_at: faker.date.past(),
+      });
     },
-    { count: { min: 0, max: 10 } }
+    { count: { min: 0, max: 35 } }
   );
 }
 

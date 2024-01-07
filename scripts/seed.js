@@ -6,58 +6,68 @@ const client = await createClient();
 try {
   await client.transaction(async () => {
     await Promise.all([
-      client.batchInsert({
+      client.bulkInsert({
         tableName: "status",
-        columns: ["status"],
-        values: dataset.status.map((status) => [status]),
+        columns: {
+          status: "TEXT",
+        },
+        records: dataset.status,
       }),
-      client.batchInsert({
+      client.bulkInsert({
         tableName: "categories",
-        columns: ["category_id", "name", "description", "slug"],
-        values: dataset.categories,
+        columns: {
+          category_id: "INT",
+          name: "TEXT",
+          description: "TEXT",
+          slug: "TEXT",
+        },
+        records: dataset.categories,
       }),
-      client.batchInsert({
+      client.bulkInsert({
         tableName: "users",
-        columns: [
-          "user_id",
-          "username",
-          "password",
-          "first_name",
-          "last_name",
-          "email",
-          "registered_at",
-        ],
-        values: dataset.users,
+        columns: {
+          user_id: "INT",
+          username: "TEXT",
+          password: "TEXT",
+          first_name: "TEXT",
+          last_name: "TEXT",
+          email: "TEXT",
+          registered_at: "TIMESTAMPTZ",
+        },
+        records: dataset.users,
       }),
-      client.batchInsert({
+      client.bulkInsert({
         tableName: "posts",
-        columns: [
-          "post_id",
-          "title",
-          "content",
-          "slug",
-          "user_id",
-          "status",
-          "published_at",
-          "updated_at",
-        ],
-        values: dataset.posts,
+        columns: {
+          post_id: "INT",
+          title: "TEXT",
+          content: "TEXT",
+          slug: "TEXT",
+          user_id: "INT",
+          status: "TEXT",
+          published_at: "TIMESTAMPTZ",
+          updated_at: "TIMESTAMPTZ",
+        },
+        records: dataset.posts,
       }),
-      client.batchInsert({
+      client.bulkInsert({
         tableName: "posts_categories",
-        columns: ["post_id", "category_id"],
-        values: dataset.postsCategories,
+        columns: {
+          post_id: "INT",
+          category_id: "INT",
+        },
+        records: dataset.postsCategories,
       }),
-      client.batchInsert({
+      client.bulkInsert({
         tableName: "comments",
-        columns: [
-          "comment_id",
-          "content",
-          "user_id",
-          "post_id",
-          "published_at",
-        ],
-        values: dataset.comments,
+        columns: {
+          comment_id: "INT",
+          content: "TEXT",
+          user_id: "INT",
+          post_id: "INT",
+          published_at: "TIMESTAMPTZ",
+        },
+        records: dataset.comments,
       }),
     ]);
   });
