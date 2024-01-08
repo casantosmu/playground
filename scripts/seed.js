@@ -1,7 +1,8 @@
-import { createClient } from "#db";
 import dataset from "#dataset.json" assert { type: "json" };
+import { Client } from "#lib/db";
 
-const client = await createClient();
+const client = new Client();
+await client.connect();
 
 try {
   await client.transaction(async () => {
