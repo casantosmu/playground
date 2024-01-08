@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "#db": ["./db.js"],
+      "#lib/db": ["./lib/db.js"],
       "#dataset.json": ["./dataset.json"]
     }
   }

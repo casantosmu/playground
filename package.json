@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "imports": {
-    "#db": "./db.js",
+    "#lib/db": "./lib/db.js",
     "#dataset.json": "./dataset.json"
   },
   "scripts": {

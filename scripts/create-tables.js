@@ -1,9 +1,10 @@
-import { createClient } from "#db";
+import { Client } from "#lib/db";
 
-const client = await createClient();
+const client = new Client();
+await client.connect();
 
 try {
-  await client.exec(`
+  await client.query(`
     DROP TABLE IF EXISTS comments;
     DROP TABLE IF EXISTS posts_categories;
     DROP TABLE IF EXISTS posts;

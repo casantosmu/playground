@@ -3,8 +3,8 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
 
-const getRandomIdFromRecords = (values) =>
-  faker.number.int({ min: 1, max: values.length });
+const getRandomIdFromRecords = (records) =>
+  faker.number.int({ min: 1, max: records.length });
 
 const slug = (string) => faker.helpers.slugify(string).toLowerCase();
 
@@ -12,7 +12,7 @@ const status = ["publish", "future", "draft", "pending", "private"].map(
   (status) => ({ status })
 );
 
-const users = Array.from({ length: 1000 }, (_, index) => ({
+const users = Array.from({ length: 1_000 }, (_, index) => ({
   user_id: index + 1,
   username: faker.internet.userName(),
   password: faker.internet.password(),
@@ -50,7 +50,7 @@ const categories = [
   slug: slug(name),
 }));
 
-const posts = Array.from({ length: 20000 }, (_, index) => {
+const posts = Array.from({ length: 20_000 }, (_, index) => {
   const title = faker.lorem.sentence();
   return {
     post_id: index + 1,
@@ -71,7 +71,7 @@ const comments = [];
 for (const post of posts) {
   const uniqueCategoriesIds = new Set(
     faker.helpers.multiple(() => getRandomIdFromRecords(categories), {
-      count: { min: 0, max: 7 },
+      count: { min: 1, max: 7 },
     })
   );
 
