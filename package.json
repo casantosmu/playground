@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "imports": {
-    "#lib/db": "./lib/db.js",
+    "#lib/*": "./lib/*.js",
     "#dataset.json": "./dataset.json"
   },
   "scripts": {
+    "benchmark:all": "npm run benchmark:left-join",
+    "benchmark:left-join": "node --env-file=.env benchmark/left-join.js",
     "db:all": "npm run db:create-tables && npm run db:seed",
     "db:create-tables": "node --env-file=.env scripts/create-tables.js",
     "db:seed": "node --env-file=.env scripts/seed.js",
@@ -17,6 +19,7 @@
     "pg": "^8.11.3"
   },
   "devDependencies": {
-    "@faker-js/faker": "^8.3.1"
+    "@faker-js/faker": "^8.3.1",
+    "autocannon": "^7.14.0"
   }
 }
