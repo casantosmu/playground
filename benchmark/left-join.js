@@ -1,14 +1,11 @@
-import { Client } from "#lib/db";
+import { pool } from "#lib/db";
 import { Server } from "#lib/server";
 import { loadTest } from "#lib/load-test";
 
 const stdout = process.stdout;
 
-const client = new Client();
-await client.connect();
-
 const handler = async () => {
-  const res = await client.query(`
+  const res = await pool.query(`
     SELECT 
       p.post_id, p.title, p.content, p.slug, p.status, p.published_at, p.updated_at, 
       u.user_id, u.username, u.first_name, u.last_name, u.email, 
@@ -18,7 +15,7 @@ const handler = async () => {
     FROM (
       SELECT post_id, title, content, slug, status, published_at, updated_at, user_id
       FROM posts
-      LIMIT 50
+      LIMIT 500
     ) p
     LEFT JOIN users u ON u.user_id = p.user_id
     LEFT JOIN posts_categories pc ON pc.post_id = p.post_id
