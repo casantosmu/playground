@@ -93,8 +93,7 @@ for (const post of posts) {
   );
 }
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const filePath = path.join(__dirname, "..", "dataset.json");
+const filePath = path.join(import.meta.dirname, "..", "dataset.json");
 const fileContent = JSON.stringify({
   status,
   users,
