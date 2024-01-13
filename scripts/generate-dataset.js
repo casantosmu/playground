@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -104,3 +103,5 @@ const fileContent = JSON.stringify({
 });
 
 fs.writeFileSync(filePath, fileContent);
+
+console.log("Data generation completed successfully!");
