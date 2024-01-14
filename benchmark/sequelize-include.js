@@ -1,3 +1,4 @@
+import bodyJson from "#lib/body.json" assert { type: "json" };
 import { Server } from "#lib/server";
 import { loadTest } from "#lib/load-test";
 import { models } from "#lib/sequelize";
@@ -19,7 +20,7 @@ const handler = async () => {
       {
         model: models.User,
         as: "author",
-        attributes: ["id", "username", "firstName", "lastName", "email"],
+        attributes: ["id", "email", "username", "firstName", "lastName"],
       },
       {
         model: models.Category,
@@ -39,13 +40,22 @@ const handler = async () => {
       },
     ],
     limit: 500,
+    order: [
+      ["id"],
+      [{ model: models.Category, as: "categories" }, "id"],
+      [{ model: models.Comment, as: "comments" }, "id"],
+    ],
   });
 };
 
 const server = new Server(handler);
 const { port, address } = await server.start();
 
-const result = await loadTest({ url: `http://${address}:${port}` });
+const expectedBody = JSON.stringify(bodyJson);
+const result = await loadTest({
+  url: `http://${address}:${port}`,
+  verifyBody: (body) => body === expectedBody,
+});
 
 stdout.write("\n");
 stdout.write("Sequelize Eager Loading\n");

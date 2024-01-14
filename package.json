@@ -8,6 +8,7 @@
   },
   "imports": {
     "#lib/*": "./lib/*.js",
+    "#lib/*.json": "./lib/*.json",
     "#dataset.json": "./dataset.json"
   },
   "scripts": {
