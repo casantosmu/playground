@@ -1,4 +1,4 @@
-import { pool } from "#lib/db";
+import { pool } from "#lib/pg";
 import { Server } from "#lib/server";
 import { loadTest } from "#lib/load-test";
 
@@ -63,7 +63,7 @@ const handler = async () => {
         id: row.comment_id,
         content: row.comment_content,
         publishedAt: row.comment_published_at,
-        user: {
+        author: {
           id: row.comment_user_id,
           username: row.comment_user_username,
         },
@@ -84,7 +84,7 @@ const { port, address } = await server.start();
 const result = await loadTest({ url: `http://${address}:${port}` });
 
 stdout.write("\n");
-stdout.write("Left join\n");
+stdout.write("node-postgres Left Join\n");
 stdout.write(result);
 stdout.write("\n");
 

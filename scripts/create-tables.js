@@ -1,4 +1,4 @@
-import { Client } from "#lib/db";
+import { Client } from "#lib/pg";
 
 const client = new Client();
 await client.connect();
