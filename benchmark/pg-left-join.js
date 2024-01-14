@@ -1,3 +1,4 @@
+import bodyJson from "#lib/body.json" assert { type: "json" };
 import { pool } from "#lib/pg";
 import { Server } from "#lib/server";
 import { loadTest } from "#lib/load-test";
@@ -15,6 +16,7 @@ const handler = async () => {
     FROM (
       SELECT post_id, title, content, slug, status, published_at, updated_at, user_id
       FROM posts
+      ORDER BY post_id
       LIMIT 500
     ) p
     LEFT JOIN users u ON u.user_id = p.user_id
@@ -22,6 +24,7 @@ const handler = async () => {
     LEFT JOIN categories cat ON cat.category_id = pc.category_id
     LEFT JOIN comments c ON c.post_id = p.post_id
     LEFT JOIN users cu ON cu.user_id = c.user_id
+    ORDER BY p.post_id, cat.category_id, c.comment_id
   `);
 
   const posts = new Map();
@@ -81,7 +84,11 @@ const handler = async () => {
 const server = new Server(handler);
 const { port, address } = await server.start();
 
-const result = await loadTest({ url: `http://${address}:${port}` });
+const expectedBody = JSON.stringify(bodyJson);
+const result = await loadTest({
+  url: `http://${address}:${port}`,
+  verifyBody: (body) => body === expectedBody,
+});
 
 stdout.write("\n");
 stdout.write("node-postgres Left Join\n");
